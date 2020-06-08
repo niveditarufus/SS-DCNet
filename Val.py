@@ -26,9 +26,11 @@ def test_phase(opt,net,testloader,log_save_path=None):
         rmse = 0.0
         me = 0.0
         for j, data in enumerate(testloader):
-            inputs , labels = data['image'], data['all_num']
-            inputs,labels = inputs.type(torch.float32),labels.unsqueeze(1).type(torch.float32)
-            inputs, labels = inputs.cuda(), labels.cuda()
+            # inputs , labels = data['image'], data['all_num']
+            inputs = data['image']
+            # inputs,labels = inputs.type(torch.float32),labels.unsqueeze(1).type(torch.float32)
+            inputs = inputs.type(torch.float32)
+            inputs = inputs.cuda()
             # process with SSDCNet
             features = net(inputs)
             div_res = net.resample(features)
@@ -37,32 +39,31 @@ def test_phase(opt,net,testloader,log_save_path=None):
             del merge_res
             # compute the count value ( gt & pre)
             pre =  (outputs).sum()
-            gt = labels.sum()
+            # gt = labels.sum()
             # compute the metrics                     
-            mae += abs(pre-gt)
-            rmse += (pre-gt)*(pre-gt)
-            me += (pre-gt)
+            # mae += abs(pre-gt)
+            # rmse += (pre-gt)*(pre-gt)
+            # me += (pre-gt)
             end = time()
             running_frame_rate = opt['test_batch_size'] * float( 1 / (end - start))
             avg_frame_rate = (avg_frame_rate*j + running_frame_rate)/(j+1)
             if j % 1 == 0:    # print every 2000 mini-batches
-                print('Test:[%5d/%5d] pre: %.3f gt:%.3f err:%.3f frame: %.2fHz/%.2fHz' %
-                        ( j + 1,len(testloader), pre, gt,pre-gt,
-                        running_frame_rate,avg_frame_rate) )
+                print('Test:[%5d/%5d] pre: %.3f frame: %.2fHz/%.2fHz' %
+                        ( j + 1,len(testloader), int(pre), running_frame_rate,avg_frame_rate) )
                 start = time()
         
         im_num = len(testloader)
-        log_str =  '%10s\t %8s\t &%8s\t &%8s\t\\\\' % (' ','mae','rmse','me')+'\n'
-        log_str += '%-10s\t %8.3f\t %8.3f\t %8.3f\t' % ( 'test',mae/im_num,math.sqrt(rmse/im_num),me/im_num ) + '\n'
-        print(log_str)
-        if log_save_path:
-            txt_write(log_save_path,log_str,mode='w')
+        # log_str =  '%10s\t %8s\t &%8s\t &%8s\t\\\\' % (' ','mae','rmse','me')+'\n'
+        # log_str += '%-10s\t %8.3f\t %8.3f\t %8.3f\t' % ( 'test',mae/im_num,math.sqrt(rmse/im_num),me/im_num ) + '\n'
+        # print(log_str)
+        # if log_save_path:
+        #     txt_write(log_save_path,log_str,mode='w')
     # return log
     im_num = len(testloader)
     test_dict=dict()
-    test_dict['mae'] = mae / im_num
-    test_dict['mse'] = math.sqrt(rmse/(im_num))
-    test_dict['me'] = me/(im_num)
+    # test_dict['mae'] = mae / im_num
+    # test_dict['mse'] = math.sqrt(rmse/(im_num))
+    # test_dict['me'] = me/(im_num)
     return test_dict
 
 
